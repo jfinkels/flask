@@ -129,6 +129,13 @@ def jsonify(*args, **kwargs):
         If the ``padded`` argument is a string, jsonify will look for
         the request argument with the same name and use that value as the
         callback-function name.
+
+    .. versionadded:: 0.9
+       If the ``default`` keyword argument is provided, it can be a function
+       which takes a Python object as input and returns a (JSON) string
+       representation of that object. This parameter is provided directly to
+       the :func:`json.dumps` function.
+
     """
     if __debug__:
         _assert_have_json()
@@ -142,8 +149,10 @@ def jsonify(*args, **kwargs):
         json_str = json.dumps(dict(*args, **kwargs), indent=None)
         content = str(callback) + "(" + json_str + ")"
         return current_app.response_class(content, mimetype='application/javascript')
-    return current_app.response_class(json.dumps(dict(*args, **kwargs),
-        indent=None if request.is_xhr else 2), mimetype='application/json')
+    default = kwargs.pop('default', None)
+    content = json.dumps(dict(*args, **kwargs), default=default,
+                         indent=None if request.is_xhr else 2)
+    return current_app.response_class(content, mimetype='application/json')
 
 
 def make_response(*args):

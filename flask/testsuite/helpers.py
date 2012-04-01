@@ -11,6 +11,7 @@
 
 from __future__ import with_statement
 
+import datetime
 import os
 import flask
 import unittest
@@ -63,6 +64,23 @@ class JSONTestCase(FlaskTestCase):
         resp = c.get('/', data=u'"Hällo Wörld"'.encode('iso-8859-15'),
                      content_type='application/json; charset=iso-8859-15')
         self.assert_equal(resp.data, u'Hällo Wörld'.encode('utf-8'))
+
+    def test_jsonify_default(self):
+        app = flask.Flask(__name__)
+        app.testing = True
+        def default_func(obj):
+            if isinstance(obj, datetime.datetime):
+                return obj.isoformat()
+            raise TypeError
+        now = datetime.datetime.now()
+        d = dict(a=123, b=now)
+        @app.route('/json')
+        def json():
+            return flask.jsonify(d, default=default_func)
+        c = app.test_client()
+        resp = c.get('/json')
+        responsedict = flask.json.loads(resp.data)
+        self.assert_equal(responsedict, dict(a=123, b=now.isoformat()))
 
     def test_jsonify(self):
         d = dict(a=23, b=42, c=[1, 2, 3])

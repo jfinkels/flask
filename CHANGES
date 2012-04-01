@@ -8,6 +8,7 @@ Version 0.9
 
 Relase date to be decided, codename to be chosen.
 
+- Added the ``default`` keyword argument to :func:`flask.jsonify`.
 - The :func:`flask.Request.on_json_loading_failed` now returns a JSON formatted
   response by default.
 - The :func:`flask.url_for` function now can generate anchors to the
